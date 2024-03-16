@@ -1,4 +1,6 @@
 from os import listdir, path
+import os
+from pprint import pprint
 
 # hardcoded rn
 basic_genes = ['CBWD6','C1orf116','DIO2','LRRC37A2','MAEL','SPATA22','HRH1','RASA4','LRP5L', 'ZNF404']
@@ -14,19 +16,22 @@ def get_interesting_genes(path: str="all_genes.txt"):
 def get_all_data(path: str) -> None:
     all_files = listdir(path)
     interesting_gen = get_interesting_genes()
-    for f in all_files:
-        if path.isfile(f):  # NOTE stuff below needs to go to separate func
-            found_genes = []
-            with open(f) as patient_file:
-                for line in patient_file:
-                    proc_line = line.split()
-                    for el in proc_line:
-                        if el in good_genes:
-                            found_genes.append(proc_line)
-            print(found_genes)
-        else:
-            print(f'WARNING found something thats not a file: {f}')
+    for file_that_is_a_dir in all_files:
+        f = list(listdir(os.path.join(path, file_that_is_a_dir)))[0]     # file is in a directory, so we move to the first file inside (assuing there's only one there)
+        # if os.path.isfile(os.path.join(path, f)):  # NOTE stuff below needs to go to separate func
+        found_genes = []
+        full_path = os.path.join(path, file_that_is_a_dir, f)
+        with open(full_path) as patient_file:
+            for line in patient_file:
+                proc_line = line.split()
+                for el in proc_line:
+                    if el in interesting_gen:
+                        found_genes.append(proc_line)
+        for record in found_genes:
+            print(record[1], record[3])
+        # else:
+        #     print(f'WARNING found something thats not a file: {f}')
 
 if __name__ == '__main__':
-    path = r''
+    path = r'RawData\\'
     get_all_data(path)
