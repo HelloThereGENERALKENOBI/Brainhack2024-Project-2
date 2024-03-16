@@ -1,5 +1,25 @@
 import pandas as pd
-import os
+
+
+def normalizeData(arr: list) -> list:
+    smallest = min(arr)
+    greatest = max(arr)
+    new_arr = []
+    for el in arr:
+        new_el = (el - smallest) / (greatest - smallest)
+        new_arr.append(new_el)
+    return new_arr
+
+
+def formatDataForCNN(geneNames: list, z_scores: list) -> None:
+    if len(geneNames) != len(z_scores):
+        return
+    new_file = open("entryData.csv", "w")
+    for i in range(len(z_scores)):
+        new_file.write(geneNames[i])
+        new_file.write(";")
+        new_file.write(z_scores[i])
+        new_file.write('\n')
 
 
 def filterData(filename):
@@ -13,7 +33,6 @@ def filterData(filename):
 
 
 def matchData(filename):
-
     found_genes = []
     good_genes = []
 
@@ -37,6 +56,7 @@ def matchData(filename):
         f.write("\n")
 
 
-filename = 'patientZero.tsv'
-filterData('patientZero.tsv')
-matchData('unfilteredData.csv')
+if __name__ == "__main__":
+    filename = 'patientZero.tsv'
+    filterData('patientZero.tsv')
+    matchData('unfilteredData.csv')
