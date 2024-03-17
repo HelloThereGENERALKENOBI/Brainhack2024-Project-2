@@ -66,7 +66,7 @@ def formatDataForCNN(geneNames: list, z_scores: list) -> None:
     #     print(f'{geneNames[i]}; {str(z_scores[i])} \n')
     output = []
     for i in range(len(z_scores)):
-        output.append((geneNames[i],str(z_scores[i])))
+        output.append((geneNames[i], float(z_scores[i])))
         
 
     return output
