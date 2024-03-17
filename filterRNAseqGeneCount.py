@@ -2,7 +2,7 @@ import pandas as pd
 
 
 
-def remove_useless_data(filename):
+def remove_useless_data(filename) -> pd.DataFrame:
     try:
         geneExpressionFile = pd.read_table(filename, sep='\t', header=1)
         geneExpressionFile = geneExpressionFile.iloc[4:]
@@ -10,31 +10,25 @@ def remove_useless_data(filename):
         print("There was an error loading gene expression quantity data")
 
     geneExpressionFile.get(["gene_name", "unstranded"]).to_csv('unfilteredData.csv', index=False)
+
     return geneExpressionFile.get(["gene_name", "unstranded"])
 
-# def matchData(filename):
-#     found_genes = []
-#     good_genes = []
-#
-#     with open("all_genes_methy.txt") as ent_data:
-#         for line in ent_data:
-#             line = line.strip("\n")
-#             good_genes.append(line)
-#
-#     with open(filename) as file:
-#         for line in file:
-#             proc_line = line.split()
-#             for el in proc_line:
-#                 if el in good_genes:
-#                     found_genes.append(proc_line)
-#
-#     f = open("found_genes_unstranded.txt", "a")
-#     for el in found_genes:
-#         f.write(el[1])
-#         f.write(";")
-#         f.write(el[3])
-#         f.write("\n")
+def remove_unused_genes(data: pd.DataFrame) -> pd.DataFrame:
+    gene_names = pd.read_csv("all_genes.txt", delimiter=" ", header=None, names=["gene_name"])
+    data = data[data['gene_name'].isin(gene_names['gene_name'])]
+    data.reset_index(drop=True, inplace=True)
+    return data
 
+def rescore(data: pd.DataFrame) -> pd.DataFrame:
+    def normalization(x):
+        smallest = data["unstranded"].min()
+        greatest = data["unstranded"].max()
+        return (x - smallest) / (greatest - smallest)
+
+    data["unstranded"] = data["unstranded"].apply(normalization)
+    data.to_csv('data.csv', index=False, header=False)
+
+#old version
 def matchData(geneNames, z_scores):
     possible_matches = []
     true_matches = []
@@ -96,20 +90,8 @@ def run(path):
 
     formatDataForCNN(gene_names, normalized)
 
-# remove_useless_data -> matchData -> normalize -> formatDataForCNN
-# not finished
-def remove_useless_genes(data: pd.DataFrame):
-    gene_names = pd.read_csv("all_genes.txt", delimiter=" ", header=None)
-    print(gene_names)
-    print("dupa")
-    for i in range(0, gene_names.size):
-        data.loc[data["gene_name"] == gene_names._get_value(i,0)]
-    data
-
 
 if __name__ == "__main__":
     filename = 'patientOne.tsv'
-    # ass = remove_useless_data(filename)
-    # print(ass.loc[ass["gene_name"] == "LASP1" ])
-    # remove_useless_genes(ass)
-    run(filename)
+    # remove_useless_data -> remove_unused_genes -> rescore-> output: data.scv
+    rescore(remove_unused_genes(remove_useless_data(filename)))
