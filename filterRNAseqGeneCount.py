@@ -107,7 +107,7 @@ def matchData(geneNames, z_scores):
 
 if __name__ == "__main__":
     # dupa = filter_data('patientZero.tsv')
-    print(run('patientOne.tsv'))
+    run('patientOne.tsv')
     # run("C:\\Users\\mmalk\\OneDrive - Politechnika Warszawska\\Programowanie\\Python\\Brainhack2024-Project-2\\RawData")
     # run('ass')
     # filename = 'patientZero.tsv'
