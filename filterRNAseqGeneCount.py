@@ -9,7 +9,7 @@ def remove_useless_data(filename) -> pd.DataFrame:
     except Exception as error:
         print("There was an error loading gene expression quantity data")
 
-    geneExpressionFile.get(["gene_name", "unstranded"]).to_csv('unfilteredData.csv', index=False)
+    # geneExpressionFile.get(["gene_name", "unstranded"]).to_csv('unfilteredData.csv', index=False)
 
     return geneExpressionFile.get(["gene_name", "unstranded"])
 
@@ -19,14 +19,15 @@ def remove_unused_genes(data: pd.DataFrame) -> pd.DataFrame:
     data.reset_index(drop=True, inplace=True)
     return data
 
-def rescore(data: pd.DataFrame) -> pd.DataFrame:
+def rescore(data: pd.DataFrame) -> tuple:
     def normalization(x):
         smallest = data["unstranded"].min()
         greatest = data["unstranded"].max()
         return (x - smallest) / (greatest - smallest)
 
     data["unstranded"] = data["unstranded"].apply(normalization)
-    data.to_csv('data.csv', index=False, header=False)
+    tuple_list = list(data.to_records(index=False))
+    return tuple_list
 
 #old version
 def matchData(geneNames, z_scores):
@@ -103,4 +104,4 @@ def run(path):
 if __name__ == "__main__":
     filename = 'patientOne.tsv'
     # remove_useless_data -> remove_unused_genes -> rescore-> output: data.scv
-    rescore(remove_unused_genes(remove_useless_data(filename)))
+    print(rescore(remove_unused_genes(remove_useless_data(filename))))
