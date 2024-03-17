@@ -1,63 +1,8 @@
 import pandas as pd
-import os
-
-
-def run(path):
-    # for file in os.listdir(path):
-    # print(path)
-    filter_data(path)
-    with open("unfilteredData.csv") as file:
-        gene_names = []
-        unstranded = []
-        flag = True
-        for line in file:
-            if flag == True:
-                flag = False
-                continue
-            new_line = line.split(",")
-            gene_names.append(new_line[0])
-            unstranded.append(int(new_line[1]))
-
-    # gene_names=gene_names[1::]
-    # unstranded=unstranded[1::]
-    matches = matchData(gene_names, unstranded)
-    kurwa =[]
-    for match in matches:
-        kurwa.append(match[1])
-
-    normalized = normalize_data(kurwa)
-    print(normalized)
 
 
 
-    # print(gene_expression_file)
-    # gene_length_list = gene_expression_file.get(["unstranded"])
-    # z_score = normalize_data(gene_length_list)
-    # print(z_score)
-
-
-def normalize_data(arr: list) -> list:
-    smallest = min(arr)
-    greatest = max(arr)
-    new_arr = []
-    for el in arr:
-        new_el = (el - smallest) / (greatest - smallest)
-        new_arr.append(new_el)
-    return new_arr
-
-
-def formatDataForCNN(geneNames: list, z_scores: list) -> None:
-    if len(geneNames) != len(z_scores):
-        return
-    new_file = open("entryData.csv", "w")
-    for i in range(len(z_scores)):
-        new_file.write(geneNames[i])
-        new_file.write(";")
-        new_file.write(z_scores[i])
-        new_file.write('\n')
-
-
-def filter_data(filename):
+def remove_useless_data(filename):
     try:
         geneExpressionFile = pd.read_table(filename, sep='\t', header=1)
         geneExpressionFile = geneExpressionFile.iloc[4:]
@@ -65,7 +10,7 @@ def filter_data(filename):
         print("There was an error loading gene expression quantity data")
 
     geneExpressionFile.get(["gene_name", "unstranded"]).to_csv('unfilteredData.csv', index=False)
-
+    return geneExpressionFile.get(["gene_name", "unstranded"])
 
 # def matchData(filename):
 #     found_genes = []
@@ -104,12 +49,67 @@ def matchData(geneNames, z_scores):
     true_matches.sort(key=lambda x: x[1],reverse=True)
     return true_matches
 
+def normalize_data(arr: list) -> list:
+    smallest = min(arr)
+    greatest = max(arr)
+    new_arr = []
+    for el in arr:
+        new_el = (el - smallest) / (greatest - smallest)
+        new_arr.append(new_el)
+    return new_arr
+
+def formatDataForCNN(geneNames: list, z_scores: list) -> None:
+    if len(geneNames) != len(z_scores):
+        return
+    new_file = open("entryData.csv", "w")
+    for i in range(len(z_scores)):
+        new_file.write(geneNames[i])
+        new_file.write(";")
+        new_file.write(str(z_scores[i]))
+        new_file.write('\n')
+
+def run(path):
+    # for file in os.listdir(path):
+    remove_useless_data(path)
+    with open("unfilteredData.csv") as file:
+        full_gene_names = []
+        unstranded = []
+        flag = True
+        for line in file:
+            if flag == True:
+                flag = False
+                continue
+            new_line = line.split(",")
+            full_gene_names.append(new_line[0])
+            unstranded.append(int(new_line[1]))
+
+    # gene_names=gene_names[1::]
+    # unstranded=unstranded[1::]
+    matches = matchData(full_gene_names, unstranded)
+    gene_names = []
+    gene_data = []
+    for match in matches:
+        gene_names.append(match[0])
+        gene_data.append(match[1])
+
+    normalized = normalize_data(gene_data)
+
+    formatDataForCNN(gene_names, normalized)
+
+# remove_useless_data -> matchData -> normalize -> formatDataForCNN
+# not finished
+def remove_useless_genes(data: pd.DataFrame):
+    gene_names = pd.read_csv("all_genes.txt", delimiter=" ", header=None)
+    print(gene_names)
+    print("dupa")
+    for i in range(0, gene_names.size):
+        data.loc[data["gene_name"] == gene_names._get_value(i,0)]
+    data
+
 
 if __name__ == "__main__":
-    # dupa = filter_data('patientZero.tsv')
-    run('patientOne.tsv')
-    # run("C:\\Users\\mmalk\\OneDrive - Politechnika Warszawska\\Programowanie\\Python\\Brainhack2024-Project-2\\RawData")
-    # run('ass')
-    # filename = 'patientZero.tsv'
-    # filterData('patientZero.tsv')
-    # matchData('unfilteredData.csv')
+    filename = 'patientOne.tsv'
+    # ass = remove_useless_data(filename)
+    # print(ass.loc[ass["gene_name"] == "LASP1" ])
+    # remove_useless_genes(ass)
+    run(filename)
