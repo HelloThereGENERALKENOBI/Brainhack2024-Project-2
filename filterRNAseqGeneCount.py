@@ -55,16 +55,26 @@ def normalize_data(arr: list) -> list:
 def formatDataForCNN(geneNames: list, z_scores: list) -> None:
     if len(geneNames) != len(z_scores):
         return
-    new_file = open("entryData.csv", "w")
+    # new_file = open("entryData.csv", "w")
+    # for i in range(len(z_scores)):
+    #     new_file.write(geneNames[i])
+    #     new_file.write(";")
+    #     new_file.write(str(z_scores[i]))
+    #     new_file.write('\n')
+    # NOTE below 2 lines is debugging and info
+    # for i in range(len(z_scores)):
+    #     print(f'{geneNames[i]}; {str(z_scores[i])} \n')
+    output = []
     for i in range(len(z_scores)):
-        new_file.write(geneNames[i])
-        new_file.write(";")
-        new_file.write(str(z_scores[i]))
-        new_file.write('\n')
+        output.append((geneNames[i],str(z_scores[i])))
+        
+
+    return output
 
 def run(path):
+    print('got here')
     # for file in os.listdir(path):
-    remove_useless_data(path)
+    # remove_useless_data(path)             # NOTE already done, REMEMBER TO USE THAT IN final implementation
     with open("unfilteredData.csv") as file:
         full_gene_names = []
         unstranded = []
@@ -76,7 +86,6 @@ def run(path):
             new_line = line.split(",")
             full_gene_names.append(new_line[0])
             unstranded.append(int(new_line[1]))
-
     # gene_names=gene_names[1::]
     # unstranded=unstranded[1::]
     matches = matchData(full_gene_names, unstranded)
@@ -88,7 +97,7 @@ def run(path):
 
     normalized = normalize_data(gene_data)
 
-    formatDataForCNN(gene_names, normalized)
+    return formatDataForCNN(gene_names, normalized)
 
 
 if __name__ == "__main__":
