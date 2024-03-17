@@ -78,7 +78,7 @@ def formatDataForCNN(geneNames: list, z_scores: list) -> None:
     return output
 
 def run(path):
-    print('got here')
+    # print('got here')
     # for file in os.listdir(path):
     # remove_useless_data(path)             # NOTE already done, REMEMBER TO USE THAT IN final implementation
     with open("unfilteredData.csv") as file:
